@@ -10,20 +10,56 @@ function gauss(): number {
   return m * Math.cos(2 * Math.PI * v);
 }
 
-/** B/W + gaussian grain, like the original PHOTOBOOTH_NOISE_STD = 15 */
-export function applyPhotobooth(c: HTMLCanvasElement, std = 15): void {
+const clamp255 = (v: number) => (v < 0 ? 0 : v > 255 ? 255 : v);
+const smooth = (t: number) => t * t * (3 - 2 * t);
+const clamp01 = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t);
+
+/**
+ * DUSK/01 — snapchat-style dusky grade:
+ * indigo shadows, amber highlights, vignette, matte fade, film grain.
+ */
+export function applyDuskyFilter(c: HTMLCanvasElement, grain = 10): void {
   const ctx = c.getContext("2d")!;
   const img = ctx.getImageData(0, 0, c.width, c.height);
   const p = img.data;
-  for (let i = 0; i < p.length; i += 4) {
-    const lum = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
-    const v = Math.max(0, Math.min(255, lum + gauss() * std));
-    p[i] = p[i + 1] = p[i + 2] = v;
+  const W = c.width, H = c.height;
+  const cx = W / 2, cy = H / 2;
+  const maxD = Math.hypot(cx, cy) || 1;
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      let r = p[i], g = p[i + 1], b = p[i + 2];
+      const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+      // dusk grade: amber highlights / indigo shadows
+      const warm = smooth(clamp01((lum - 0.42) / 0.58));
+      const cool = 1 - warm;
+      r += 30 * warm - 16 * cool;
+      g += 8 * warm - 4 * cool;
+      b += -18 * warm + 34 * cool;
+
+      // vignette
+      const dist = Math.hypot(x - cx, y - cy) / maxD;
+      const vig = 1 - 0.42 * smooth(clamp01((dist - 0.55) / 0.45));
+      r *= vig; g *= vig; b *= vig;
+
+      // matte fade (lifted blacks)
+      r = 12 + r * 0.9;
+      g = 12 + g * 0.9;
+      b = 14 + b * 0.9;
+
+      // film grain
+      const n = gauss() * grain;
+      p[i] = clamp255(r + n);
+      p[i + 1] = clamp255(g + n);
+      p[i + 2] = clamp255(b + n);
+    }
   }
   ctx.putImageData(img, 0, 0);
 }
 
-/** mirrored crop of the live video, processed */
+/** mirrored crop of the live video, then DUSK grade baked in */
 export function captureFrame(video: HTMLVideoElement, box: Box, targetW = 480): HTMLCanvasElement {
   const c = document.createElement("canvas");
   const vw = video.videoWidth, vh = video.videoHeight;
@@ -39,7 +75,7 @@ export function captureFrame(video: HTMLVideoElement, box: Box, targetW = 480): 
     0, 0, c.width, c.height,
   );
   ctx.restore();
-  applyPhotobooth(c);
+  applyDuskyFilter(c);
   return c;
 }
 
@@ -70,7 +106,7 @@ export async function buildStrip(shots: string[]): Promise<string> {
   ctx.font = "600 16px monospace";
   ctx.fillText("PUZZLE-CAM", pad, pad + 14);
   ctx.textAlign = "right";
-  ctx.fillText("HAND-FRAME CAPTURE", c.width - pad, pad + 14);
+  ctx.fillText("DUSK/01", c.width - pad, pad + 14);
   ctx.textAlign = "left";
   let y = head + pad;
   imgs.forEach((img, i) => {
@@ -83,7 +119,7 @@ export async function buildStrip(shots: string[]): Promise<string> {
   ctx.fillStyle = "#111";
   ctx.font = "12px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("— TIRA COMPLETA · 3/3 —", c.width / 2, c.height - pad / 1.4);
+  ctx.fillText("— FULL STRIP · 3/3 —", c.width / 2, c.height - pad / 1.4);
   return c.toDataURL("image/png");
 }
 
