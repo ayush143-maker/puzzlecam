@@ -6,7 +6,7 @@
 
 ::selection { background: #f5c518; color: #0b0b0b; }
 
-/* CRT scanlines over the stage — material, not decoration */
+/* CRT scanlines over the stage */
 .scanlines::after {
   content: "";
   position: absolute;
