@@ -59,7 +59,7 @@ export function isPinch(lm: Pt[], holding = false): boolean {
   return d(lm[4], lm[8]) / scale < (holding ? 0.6 : 0.4);
 }
 
-export function pinchPoint(lm: Pt): Pt {
+export function pinchPoint(lm: Pt[]): Pt {
   return { x: (lm[4].x + lm[8].x) / 2, y: (lm[4].y + lm[8].y) / 2 };
 }
 
