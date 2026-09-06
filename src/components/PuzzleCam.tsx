@@ -13,8 +13,8 @@ import Strip from "./Strip";
 type Phase = "boot" | "tracking" | "countdown" | "puzzle" | "solved" | "complete";
 type Piece = {
   id: number; cell: number; locked: boolean;
-  px?: number; py?: number;         // drag position (normalized stage coords)
-  tx: number; ty: number; rot: number; // shatter-settle entrance
+  px?: number; py?: number;
+  tx: number; ty: number; rot: number;
 };
 
 const HOLD_MS = 900;
@@ -63,7 +63,7 @@ export default function PuzzleCam() {
         lmRef.current = await loadHandLandmarker();
         if (!cancelled) setPhase("tracking");
       } catch {
-        if (!cancelled) setError("no se pudo abrir la cámara — permite el acceso y usa https");
+        if (!cancelled) setError("CAMERA ERROR — allow camera access and use https");
       }
     })();
     return () => { cancelled = true; stream?.getTracks().forEach((t) => t.stop()); };
@@ -149,10 +149,10 @@ export default function PuzzleCam() {
   }, []);
 
   const onDownload = useCallback(async () => {
-    downloadDataUrl(await buildStrip(shotsRef.current), "puzzle-cam-tira.png");
+    downloadDataUrl(await buildStrip(shotsRef.current), "puzzle-cam-strip.png");
   }, []);
 
-  /* ---------- state machine step ---------- */
+  /* ---------- state machine ---------- */
   function step(now: number) {
     const ph = phaseRef.current;
     const hands = handsRef.current;
@@ -201,12 +201,11 @@ export default function PuzzleCam() {
         dropPiece();
       } else if (pinch) {
         const b = boardRef.current!;
-        const hit = piecesRef.current.find(
-          (p) => !p.locked && (() => {
-            const r = cellRect(b, p.cell);
-            return pinch!.x >= r.x && pinch!.x <= r.x + r.w && pinch!.y >= r.y && pinch!.y <= r.y + r.h;
-          })(),
-        );
+        const hit = piecesRef.current.find((p) => {
+          if (p.locked) return false;
+          const r = cellRect(b, p.cell);
+          return pinch!.x >= r.x && pinch!.x <= r.x + r.w && pinch!.y >= r.y && pinch!.y <= r.y + r.h;
+        });
         if (hit) {
           const r = cellRect(b, hit.cell);
           dragRef.current = { id: hit.id, dx: pinch.x - r.x, dy: pinch.y - r.y };
@@ -225,7 +224,7 @@ export default function PuzzleCam() {
     }
   }
 
-  /* ---------- overlay: hand skeletons ---------- */
+  /* ---------- hand skeleton overlay ---------- */
   function drawOverlay() {
     const c = overlayRef.current, stage = stageRef.current;
     if (!c || !stage) return;
@@ -291,15 +290,15 @@ export default function PuzzleCam() {
   const countN = Math.max(1, 3 - Math.floor((performance.now() - countStartRef.current) / COUNT_STEP));
 
   const status: Record<Phase, { dot: string; text: string; cls?: string }> = {
-    boot: { dot: "bg-paper/50", text: "CARGANDO MODELO…" },
+    boot: { dot: "bg-paper/50", text: "LOADING MODEL…" },
     tracking: {
       dot: openCount === 2 ? "bg-signal" : "bg-signal blink",
-      text: openCount === 2 ? "MANOS EN SEGUIMIENTO — MANTÉN EL MARCO" : "BUSCANDO MANOS…",
+      text: openCount === 2 ? "HANDS LOCKED — HOLD THE FRAME STEADY" : "SEARCHING FOR HANDS…",
     },
-    countdown: { dot: "bg-bad blink", text: `CAPTURANDO EN ${countN}…` },
-    puzzle: { dot: "bg-signal", text: "ARMA EL ROMPECABEZAS CON PINCH" },
-    solved: { dot: "bg-ok", text: "¡COMPLETO! — PUÑO PARA GUARDAR", cls: "border-ok/50 text-ok" },
-    complete: { dot: "bg-ok", text: "TIRA COMPLETA — DESCARGA O REINICIA", cls: "border-ok/50 text-ok" },
+    countdown: { dot: "bg-bad blink", text: `CAPTURING IN ${countN}…` },
+    puzzle: { dot: "bg-signal", text: "SOLVE THE PUZZLE WITH PINCH" },
+    solved: { dot: "bg-ok", text: "COMPLETE! — FIST TO SAVE", cls: "border-ok/50 text-ok" },
+    complete: { dot: "bg-ok", text: "STRIP COMPLETE — DOWNLOAD OR RESTART", cls: "border-ok/50 text-ok" },
   };
   const st = status[phase];
 
@@ -319,7 +318,18 @@ export default function PuzzleCam() {
 
         <div ref={wrapRef} className="relative flex min-h-0 flex-1 items-center justify-center">
           <div ref={stageRef} className="scanlines relative overflow-hidden border border-line bg-black">
-            <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full -scale-x-100 object-fill" />
+            {/* live video with DUSK/01 filter */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 h-full w-full -scale-x-100 object-fill [filter:contrast(1.1)_saturate(0.78)_brightness(0.94)_sepia(0.14)]"
+            />
+            {/* dusk tint + vignette overlays */}
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(70,52,120,0.16),rgba(255,140,60,0.10))] mix-blend-screen" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(8,6,18,0.5)_100%)]" />
+
             <canvas ref={overlayRef} className="absolute inset-0" />
 
             {/* hand frame + countdown */}
@@ -344,22 +354,30 @@ export default function PuzzleCam() {
                   style={{ left: board.x * SW, top: board.y * SH, width: board.w * SW, height: board.h * SH }}
                 />
                 {piecesRef.current.map((p) => {
-                  const r = p.px != null && p.py != null ? { ...cellRect(board, 0), x: p.px, y: p.py } : cellRect(board, p.cell);
+                  const r =
+                    p.px != null && p.py != null
+                      ? { x: p.px, y: p.py, w: board.w / 3, h: board.h / 3 }
+                      : cellRect(board, p.cell);
                   const col = p.id % 3, row = Math.floor(p.id / 3);
                   return (
                     <div
                       key={p.id}
                       className={`absolute border ${p.locked ? "border-ok/70" : "border-black/60 shadow-[0_0_0_1px_rgba(255,255,255,0.25)]"}`}
                       style={{
-                        left: r.x * SW, top: r.y * SH, width: r.w * SW, height: r.h * SH,
+                        left: r.x * SW,
+                        top: r.y * SH,
+                        width: r.w * SW,
+                        height: r.h * SH,
                         backgroundImage: `url(${shot})`,
                         backgroundSize: `${board.w * SW}px ${board.h * SH}px`,
                         backgroundPosition: `-${col * r.w * SW}px -${row * r.h * SH}px`,
                         zIndex: dragRef.current?.id === p.id ? 30 : p.locked ? 10 : 15,
-                        animation: p.locked ? undefined : `settle 0.45s ${p.id * 40}ms cubic-bezier(0.2,0.8,0.3,1) both`,
-                        ["--tx" as string]: `${p.tx}px`,
-                        ["--ty" as string]: `${p.ty}px`,
-                        ["--rot" as string]: `${p.rot}deg`,
+                        animation: p.locked
+                          ? undefined
+                          : `settle 0.45s ${p.id * 40}ms cubic-bezier(0.2,0.8,0.3,1) both`,
+                        "--tx": `${p.tx}px`,
+                        "--ty": `${p.ty}px`,
+                        "--rot": `${p.rot}deg`,
                       } as React.CSSProperties}
                     />
                   );
@@ -369,15 +387,19 @@ export default function PuzzleCam() {
 
             {phase === "solved" && (
               <p className="absolute inset-x-0 top-1/2 z-40 -translate-y-1/2 text-center text-lg tracking-[0.15em] text-ok drop-shadow-[0_1px_0_#000]">
-                ¡COMPLETO! — puño para guardar
+                COMPLETE! — fist to save
               </p>
             )}
 
             {phase === "puzzle" && (
               <span className="absolute right-2 top-2 z-40 border border-line bg-ink/80 px-2 py-1 text-[10px] tracking-[0.2em] text-signal">
-                {locked} / 9 PIEZAS COLOCADAS
+                {locked} / 9 PIECES PLACED
               </span>
             )}
+
+            <span className="absolute bottom-2 left-2 z-40 border border-line bg-ink/70 px-2 py-1 text-[10px] tracking-[0.2em] text-paper/70">
+              FILTER — DUSK/01
+            </span>
 
             {error && (
               <p className="absolute inset-x-4 top-4 z-50 border border-bad bg-ink/90 p-3 text-center text-[11px] tracking-[0.15em] text-bad">
@@ -386,6 +408,13 @@ export default function PuzzleCam() {
             )}
           </div>
         </div>
+
+        <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2 text-[10px] tracking-[0.2em] text-paper/50">
+          <span>OPEN HANDS = FRAME</span>
+          <span>PINCH = DRAG TILE</span>
+          <span>FIST = SAVE</span>
+          <span className="text-signal">3 PHOTOS = STRIP</span>
+        </footer>
       </main>
 
       <Strip shots={shots} complete={shots.length >= SHOTS} onDownload={onDownload} onReset={resetAll} />
