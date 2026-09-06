@@ -50,37 +50,32 @@ export function extendedCount(lm: Pt[]): number {
   return n;
 }
 
-export const isOpen = (lm: Pt[]) => extendedCount(lm) >= 3;
 export const isFist = (lm: Pt[]) => extendedCount(lm) <= 1;
 
+/** tight to grab (0.35), loose to keep holding (0.7) = no flicker */
 export function isPinch(lm: Pt[], holding = false): boolean {
   const scale = d(lm[0], lm[9]) || 1e-6;
-  return d(lm[4], lm[8]) / scale < (holding ? 0.6 : 0.4);
+  return d(lm[4], lm[8]) / scale < (holding ? 0.7 : 0.35);
 }
 
 export function pinchPoint(lm: Pt[]): Pt {
   return { x: (lm[4].x + lm[8].x) / 2, y: (lm[4].y + lm[8].y) / 2 };
 }
 
-export function handsBox(hands: Hand[]): Box {
-  let minX = 1, minY = 1, maxX = 0, maxY = 0;
-  for (const h of hands) {
-    for (const p of h.lm) {
-      const x = 1 - p.x;
-      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-      minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
-    }
-  }
-  const pad = 0.14;
-  const w0 = maxX - minX, h0 = maxY - minY;
-  let x = minX - w0 * pad;
-  let y = minY - h0 * pad;
-  let w = w0 * (1 + pad * 2);
-  let h = h0 * (1 + pad * 2);
+/** two pinch points (mirrored) = two corners of the capture frame */
+export function pinchBox(a: Pt, b: Pt, pad = 0.05): Box {
+  const ax = 1 - a.x, bx = 1 - b.x;
+  const x0 = Math.min(ax, bx), x1 = Math.max(ax, bx);
+  const y0 = Math.min(a.y, b.y), y1 = Math.max(a.y, b.y);
+  const w0 = x1 - x0, h0 = y1 - y0;
+  let x = x0 - w0 * pad;
+  let y = y0 - h0 * pad;
+  let w = w0 * (1 + 2 * pad);
+  let h = h0 * (1 + 2 * pad);
   x = Math.min(Math.max(x, 0), 0.8);
   y = Math.min(Math.max(y, 0), 0.8);
-  w = Math.min(Math.max(w, 0.25), 1 - x);
-  h = Math.min(Math.max(h, 0.25), 1 - y);
+  w = Math.min(Math.max(w, 0.2), 1 - x);
+  h = Math.min(Math.max(h, 0.2), 1 - y);
   return { x, y, w, h };
 }
 
