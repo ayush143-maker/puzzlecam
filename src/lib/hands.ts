@@ -40,7 +40,7 @@ export async function loadHandLandmarker(): Promise<HandLandmarker> {
 }
 
 const d = (a: Pt, b: Pt) => Math.hypot(a.x - b.x, a.y - b.y);
-const FINGERS: [number, number][] = [[6, 8], [10, 12], [14, 16], [18, 20]]; // pip, tip
+const FINGERS: [number, number][] = [[6, 8], [10, 12], [14, 16], [18, 20]];
 
 export function extendedCount(lm: Pt[]): number {
   let n = 0;
@@ -53,7 +53,6 @@ export function extendedCount(lm: Pt[]): number {
 export const isOpen = (lm: Pt[]) => extendedCount(lm) >= 3;
 export const isFist = (lm: Pt[]) => extendedCount(lm) <= 1;
 
-/** pinch with hysteresis: tighter to start, looser to keep holding */
 export function isPinch(lm: Pt[], holding = false): boolean {
   const scale = d(lm[0], lm[9]) || 1e-6;
   return d(lm[4], lm[8]) / scale < (holding ? 0.6 : 0.4);
@@ -63,7 +62,6 @@ export function pinchPoint(lm: Pt[]): Pt {
   return { x: (lm[4].x + lm[8].x) / 2, y: (lm[4].y + lm[8].y) / 2 };
 }
 
-/** bounding box of two open hands, mirrored + padded, normalized */
 export function handsBox(hands: Hand[]): Box {
   let minX = 1, minY = 1, maxX = 0, maxY = 0;
   for (const h of hands) {
