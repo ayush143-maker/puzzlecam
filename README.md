@@ -22,16 +22,17 @@ npm start
 
 If a camera feature does not start, check browser permissions, device availability, and the MediaPipe setup in the source. No deployment provider or production hosting configuration is specified.
 
-## Manual review checklist
+## Browser and platform review checklist
 
-These are actions to perform, not verified results or performance measurements. Record findings separately.
+These are actions to perform, not verified compatibility results or performance measurements. Record the browsers, versions, devices, and findings separately; this README does not claim that testing has been completed.
 
-- [ ] Start the app and open its root page at the local address printed by the development server. Inspect `src` to identify the page and its referenced components.
-- [ ] Inspect the page and source for image, audio, video, camera, font, and other resource references. Check that every referenced local path resolves to an existing file and review external URLs for availability.
+- [ ] Start the app and open its root page at the local address printed by the development server. Inspect `src` to identify the page, components, and resources involved.
+- [ ] Check the experience in current stable browsers relevant to this Next.js, React, and MediaPipe Tasks Vision app and its intended audience. Include mobile and desktop browsers where applicable; do not infer support for a browser or device that was not checked.
+- [ ] In each browser, inspect the developer console for errors and warnings. Use the Network panel to check failed requests, unexpected redirects, and resources that do not load, including requests associated with the vision setup.
+- [ ] Inspect the page and source for image, audio, video, camera, font, and other resource references. Check that every referenced local path resolves from the file using it, and review external URLs for correct and intentional requests.
 - [ ] Confirm that referenced assets are used before retaining them; remove files only after checking imports and other references. Consider whether large media is necessary before adding it, without treating this as a measured performance result.
-- [ ] Review any external font or script dependencies in the source. Confirm they are intentional and still needed, and document their purpose rather than assuming an external request is required.
-- [ ] Try the interactions actually presented by the interface. If the app requests camera access, review the permission prompt and camera flow with an available device; do not assume additional controls or outcomes beyond what the source and page describe.
-- [ ] Inspect the page at narrow and wide viewports. Check that the camera-oriented interface and visible controls remain accessible and note overflow or layout issues.
+- [ ] Try the interactions actually presented by the interface. If it requests camera access, review the permission prompt and camera flow with an available device. Check behavior when permission is denied or no camera is available, where the implementation provides a relevant flow; do not assume controls or outcomes beyond what the source and page describe.
+- [ ] Inspect the page at narrow mobile and wide desktop viewport sizes. Check that the camera-oriented interface and visible controls remain accessible, and note overflow or layout issues. Where possible, also check on an actual mobile device, including its camera permission flow.
 - [ ] After a change, reload the app and repeat the checks affected by that change.
 
 ## Accessibility review checklist
