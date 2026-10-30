@@ -1,6 +1,6 @@
 # puzzlecam
 
-A Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Camera access may be needed for its browser-based vision interactions.
+A Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Its browser-based vision interactions may require camera access. The README does not specify further interface controls or behaviors.
 
 ## Run locally
 
