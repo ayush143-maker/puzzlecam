@@ -1,6 +1,6 @@
 # puzzlecam
 
-`puzzlecam` is a TypeScript Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Camera-based interactions may require browser permission. Consult the application source for the exact controls and behavior; the supplied project information does not establish camera-data handling or a specific permission fallback.
+`puzzlecam` is a TypeScript Next.js and React camera experience using MediaPipe Tasks Vision. It turns a live camera feed into a hand-controlled photo puzzle: capture a filtered frame, arrange its nine tiles, and collect up to three completed shots for a downloadable strip.
 
 ## Run locally
 
@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open the local address printed by the server. If prompted, allow camera access.
+Open the local address printed by the server. The app requests camera video at 640×480 with audio disabled. If camera setup or hand-landmarker loading fails, the interface displays `CAMERA ERROR — allow camera access and use https`.
 
 To create and run a production build locally:
 
@@ -20,7 +20,15 @@ npm run build
 npm start
 ```
 
-## Project structure
+## Using the camera puzzle
+
+The app loads a hand landmarker and processes video frames with `detectForVideo`. Its returned hand landmarks drive interactions and a skeleton overlay on the canvas. Pinch with both hands to set a frame, hold steady for one second, then wait through the three-count countdown. The app captures a mirrored crop and applies the DUSK/01 filter: indigo and amber grading, a vignette, lifted blacks, and generated film grain.
+
+The filtered image becomes a nine-piece puzzle. Pinch and drag a tile to move it; release near its target to lock it in place. The interface shows how many of the nine pieces are locked. Completing the puzzle triggers an automatic save after a 900 ms completion flash. The shot is held as a PNG data URL in component/runtime memory, not uploaded to a server or written to durable storage. When the third shot is captured, the app passes the shots to `Strip` with `complete` set to true. Its download handler builds a vertical PNG strip with captions and starts a browser download named `puzzle-cam-strip.png`. The supplied files do not establish the Strip component’s other UI behavior. Reset clears the in-memory shots and returns to tracking.
+
+When the component unmounts, it stops the acquired media-stream tracks. Camera permission and model loading are browser/device dependencies; the displayed error covers setup or loading failures.
+
+## Project files
 
 - `src` — application source.
 - `package.json` — dependencies and declared npm scripts.
@@ -28,10 +36,4 @@ npm start
 - `postcss.config.mjs`, `tailwind.config.ts` — styling-related configuration.
 - `tsconfig.json` — TypeScript configuration.
 
-Run commands from the project root, where `package.json`, `next.config.mjs`, and `src` are located. Check `package.json` and `next.config.mjs` for the project’s actual build and output settings; no deployment target or output directory is established here. Do not assume that copying `src` produces a finished site.
-
-## Camera and configuration considerations
-
-Review the relevant code in `src` and the MediaPipe setup to determine how camera frames are processed, whether they are transmitted or stored, and how permission denial or unavailable devices are handled. This README does not establish those details.
-
-The supplied project information does not document environment-variable names or backend configuration. Keep credentials and other secrets out of tracked files and client-side code. When reviewing a built or published application, check the browser Console and Network panel for errors and failed resource requests, including those related to vision setup. Verify camera behavior against the implementation rather than assuming a particular fallback.
+Run commands from the project root. Check `package.json` and `next.config.mjs` for build and output settings; no deployment target or output directory is established here.
