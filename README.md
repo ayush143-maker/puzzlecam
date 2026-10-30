@@ -4,7 +4,7 @@ A TypeScript Next.js and React application with a camera-oriented interface and 
 
 The project source is in `src`. At the root, `package.json` provides the npm commands below, while `next.config.mjs`, `postcss.config.mjs`, `tailwind.config.ts`, and `tsconfig.json` configure Next.js, PostCSS, Tailwind CSS, and TypeScript.
 
-## Run locally
+## Run and review locally
 
 From the project folder, install dependencies and start the development server:
 
@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open the local address printed by the development server. Allow camera permission in a compatible browser when prompted.
+Open the local address printed by the development server. Allow camera permission in a compatible browser when prompted. For a small change, edit the relevant source in `src` and review it in the browser while the development server is running.
 
 To create and run a production build:
 
