@@ -1,6 +1,8 @@
 # puzzlecam
 
-A Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Its browser-based vision interactions may require camera access. The README does not specify further interface controls or behaviors.
+A TypeScript Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Its browser-based vision interactions may require camera access; the README does not specify further interface controls or behaviors.
+
+The root includes `package.json` for the npm commands below, `src` for the project source, and configuration files for Next.js, PostCSS, Tailwind CSS, and TypeScript: `next.config.mjs`, `postcss.config.mjs`, `tailwind.config.ts`, and `tsconfig.json`.
 
 ## Run locally
 
