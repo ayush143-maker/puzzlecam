@@ -23,3 +23,11 @@ npm start
 ```
 
 If a camera feature does not start, check browser permissions, device availability, and the MediaPipe setup in the source. No deployment provider or production hosting configuration is specified.
+
+## Personalize the interface
+
+- Find the relevant page or component in `src` before editing visible text or interface elements; the root file list does not identify specific source files or asset names.
+- The repository includes `tailwind.config.ts` and `postcss.config.mjs`. Review their current contents before changing styling-related settings rather than assuming which theme options or utilities the app uses.
+- Before adding or moving images or other assets, inspect the source for existing import statements and URL references. Keep their paths valid relative to the files that use them, and update those references if files move.
+
+**Review suggestion:** Check the existing source and configuration to identify where this app defines its theme, visible copy, and any assets before documenting more specific customization steps.
