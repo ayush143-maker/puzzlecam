@@ -2,7 +2,7 @@
 
 A TypeScript Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Its browser-based vision interactions may require camera access; the README does not specify further interface controls or behaviors.
 
-The root includes `package.json` for the npm commands below, `src` for the project source, and configuration files for Next.js, PostCSS, Tailwind CSS, and TypeScript: `next.config.mjs`, `postcss.config.mjs`, `tailwind.config.ts`, and `tsconfig.json`.
+The project source is in `src`. At the root, `package.json` provides the npm commands below, while `next.config.mjs`, `postcss.config.mjs`, `tailwind.config.ts`, and `tsconfig.json` configure Next.js, PostCSS, Tailwind CSS, and TypeScript.
 
 ## Run locally
 
