@@ -22,6 +22,12 @@ npm start
 
 If a camera feature does not start, check browser permissions, device availability, and the MediaPipe setup in the source. No deployment provider or production hosting configuration is specified.
 
+## Configuration and data handling
+
+The supplied root-file list includes application configuration files but no `.env` or `.env.example` file, and no environment-variable names or backend configuration are documented here. Treat tracked configuration such as `next.config.mjs` as public source: do not add credentials, tokens, or other secrets to it or to client-side code. If you later find a local secrets template or introduce environment-based configuration, keep the template limited to placeholder names and commit no real values; review `.gitignore` and repository status before committing local files. Do not assume an environment variable or server-side secret is required unless the source establishes it.
+
+Camera access can expose live imagery from the user's surroundings. Before using the app with sensitive surroundings, inspect the relevant code in `src` and the MediaPipe setup to determine whether frames are processed locally, transmitted, or stored; this README does not establish those details. Request camera access only when needed, explain the use to users, and check the behavior when permission is denied or revoked. Do not treat browser-delivered code or values as secret.
+
 ## Browser and platform review checklist
 
 These are actions to perform, not verified compatibility results or performance measurements. Record the browsers, versions, devices, and findings separately; this README does not claim that testing has been completed.
