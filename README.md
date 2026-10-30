@@ -1,20 +1,23 @@
 # puzzlecam
 
-A Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Camera access may be required for its browser-based vision interactions.
+A Next.js and React application with a camera-oriented interface and a dependency on MediaPipe Tasks Vision. Camera access may be needed for its browser-based vision interactions.
 
 ## Run locally
 
-Install dependencies and start the development server:
+From the project folder, install dependencies and start the development server:
 
-    npm install
-    npm run dev
+```sh
+npm install
+npm run dev
+```
 
-Create a production build with:
+Open the local address printed by the development server. Allow camera permission in a compatible browser when prompted.
 
-    npm run build
+To create and run a production build:
 
-The package also provides `npm start` to serve the built application.
+```sh
+npm run build
+npm start
+```
 
-## Camera access
-
-Allow camera permission in a compatible browser when prompted. If a camera feature does not start, check browser permissions, device availability, and the MediaPipe setup in the source.
+If a camera feature does not start, check browser permissions, device availability, and the MediaPipe setup in the source.
