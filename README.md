@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open the local address printed by the development server. Allow camera permission in a compatible browser when prompted. For a small change, edit the relevant source in `src` and review it in the browser while the development server is running.
+Open the local address printed by the development server. Allow camera permission in your browser if prompted. For a small change, edit the relevant source in `src` and review it in the browser while the development server is running.
 
 To create and run a production build:
 
