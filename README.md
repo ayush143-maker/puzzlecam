@@ -15,11 +15,11 @@ npm run dev
 
 Open the local address printed by the development server. Allow camera permission in your browser if prompted. For a small change, edit the relevant source in `src` and review it in the browser while the development server is running.
 
-To create and run a production build:
+To create a production build and run it locally, use:
 
 ```sh
 npm run build
 npm start
 ```
 
-If a camera feature does not start, check browser permissions, device availability, and the MediaPipe setup in the source.
+If a camera feature does not start, check browser permissions, device availability, and the MediaPipe setup in the source. The README does not specify a deployment provider or production hosting configuration.
