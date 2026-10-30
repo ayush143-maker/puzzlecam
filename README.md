@@ -49,3 +49,8 @@ Keep changes focused on the relevant page, component, or configuration. In your 
 - Confirm the documented starting point still matches the files present at the repository root.
 - Check the scripts and dependency versions in `package.json`; use the repository's declared workflow rather than assuming a generic build command.
 - Review the published result once on a narrow screen and once on a wider screen; treat this as a release check, not an automated test report.
+
+## Repository map
+
+- `package.json` — package manifest, dependency list, and declared scripts.
+- `src` — source-code directory.
